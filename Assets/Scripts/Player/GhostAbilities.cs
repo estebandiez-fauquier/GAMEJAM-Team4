@@ -66,7 +66,12 @@ public class GhostAbilities : MonoBehaviour
         foreach (Collider obj in objects)
         {
             Rigidbody objectRb = obj.GetComponent<Rigidbody>();
-            obj.GetComponent<ThrowableFear>().thrown = true;
+            ThrowableFear fear = obj.GetComponent<ThrowableFear>();
+
+            if (fear != null)
+            {
+                fear.ThrowByPlayer();
+            }
             if (objectRb != null)
             {
                 Vector3 direction =

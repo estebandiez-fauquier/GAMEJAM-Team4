@@ -3,36 +3,37 @@ using System.Collections.Generic;
 
 public class ThrowableFear : MonoBehaviour
 {
-
-    public bool thrown = false;
-    public float timerThrown = 240;
     private HashSet<GuestAI> frightenedGuests = new HashSet<GuestAI>();
 
-    private void Update()
+    private bool thrownByPlayer = false;
+
+    public void ThrowByPlayer()
     {
-        if (thrown)
-        {
-            while(timerThrown>0)
-            {
-                timerThrown--;
-            }
-            thrown = false;
-            timerThrown = 240;
-        }
+        thrownByPlayer = true;
+        frightenedGuests.Clear();
     }
+
     private void OnCollisionEnter(Collision collision)
     {
-        if (thrown)
-        {
-            GuestAI guest = collision.collider.GetComponentInParent<GuestAI>();
-            if (guest == null)
-                return;
-            if (frightenedGuests.Contains(guest))
-                return;
-            frightenedGuests.Add(guest);
-            guest.Frighten();
+        if (!thrownByPlayer)
+            return;
 
-            Debug.Log("A guest was frightened by " + gameObject.name);
-        }
+        GuestAI guest = collision.collider.GetComponentInParent<GuestAI>();
+
+        if (guest == null)
+            return;
+
+        if (frightenedGuests.Contains(guest))
+            return;
+
+        Repulse(guest);
+    }
+
+    private void Repulse(GuestAI guest)
+    {
+        frightenedGuests.Add(guest);
+        guest.Frighten();
+
+        Debug.Log("A guest was frightened by " + gameObject.name);
     }
 }

@@ -1,38 +1,41 @@
-
 using UnityEngine;
 
 public class GuestManager : MonoBehaviour
 {
-    [Header("Guests")]
     public GuestAI[] guests;
 
     private int guestsRemaining;
 
-    public int GuestsRemaining => guestsRemaining;
-
     void Start()
     {
+        GameObject[] guestObjects = GameObject.FindGameObjectsWithTag("Guest");
+
+        guests = new GuestAI[guestObjects.Length];
+
+        for (int i = 0; i < guestObjects.Length; i++)
+        {
+            guests[i] = guestObjects[i].GetComponent<GuestAI>();
+        }
+
         guestsRemaining = guests.Length;
-        Debug.Log("Guests remaining: " + guestsRemaining);
+
+        Debug.Log("Guests found: " + guestsRemaining);
     }
 
     public void GuestLeft(GuestAI guest)
     {
         guestsRemaining--;
 
-        Debug.Log("Guests remaining: " + guestsRemaining);
+        Debug.Log("Guest left! Remaining: " + guestsRemaining);
 
         if (guestsRemaining <= 0)
         {
-            WinGame();
+            GameManager.Instance.Victory();
         }
     }
 
-    void WinGame()
+    public int GuestsRemaining
     {
-        Debug.Log("All guests have escaped! VICTORY!");
-
-        if (GameManager.Instance != null)
-            GameManager.Instance.Victory();
+        get { return guestsRemaining; }
     }
 }
