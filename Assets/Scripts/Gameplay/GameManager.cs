@@ -1,16 +1,34 @@
+
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public static GameManager Instance;
+
+    public bool gameOver = false;
+    public bool victory = false;
+
+    void Awake()
     {
-        
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    public void GameOver()
     {
-        
+        gameOver = true;
+        Debug.Log("GAME OVER");
+    }
+
+    public void Victory()
+    {
+        victory = true;
+        Debug.Log("VICTORY!");
     }
 }

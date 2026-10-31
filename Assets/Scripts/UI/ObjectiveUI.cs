@@ -1,16 +1,18 @@
+
 using UnityEngine;
+using TMPro;
 
 public class ObjectiveUI : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    public GuestManager guestManager;
+    public TMP_Text objectiveText;
 
-    // Update is called once per frame
     void Update()
     {
-        
+        if (guestManager == null || objectiveText == null)
+            return;
+
+        objectiveText.text =
+            "Guests remaining: " + guestManager.GuestsRemaining;
     }
 }

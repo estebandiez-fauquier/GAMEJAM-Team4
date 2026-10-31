@@ -1,16 +1,34 @@
+
 using UnityEngine;
 
 public class GhostLives : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    public int maxLives = 3;
+
+    private int currentLives;
+
+    public int CurrentLives => currentLives;
+
     void Start()
     {
-        
+        currentLives = maxLives;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void LoseLife()
     {
-        
+        currentLives--;
+
+        Debug.Log("Lives remaining: " + currentLives);
+
+        if (currentLives <= 0)
+        {
+            Die();
+        }
+    }
+
+    void Die()
+    {
+        Debug.Log("Game Over!");
+        gameObject.SetActive(false);
     }
 }

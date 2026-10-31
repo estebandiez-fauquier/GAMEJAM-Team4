@@ -1,16 +1,17 @@
+
 using UnityEngine;
+using TMPro;
 
 public class LivesUI : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    public GhostLives ghostLives;
+    public TMP_Text livesText;
 
-    // Update is called once per frame
     void Update()
     {
-        
+        if (ghostLives == null || livesText == null)
+            return;
+
+        livesText.text = "Lives: " + ghostLives.CurrentLives;
     }
 }
