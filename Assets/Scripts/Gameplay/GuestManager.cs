@@ -20,8 +20,6 @@ public class GuestManager : MonoBehaviour
     {
         guestsRemaining--;
 
-        guestsRemaining = Mathf.Max(0, guestsRemaining);
-
         Debug.Log("Guests remaining: " + guestsRemaining);
 
         if (guestsRemaining <= 0)
