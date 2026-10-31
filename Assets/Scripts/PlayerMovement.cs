@@ -1,58 +1,60 @@
-using UnityEngine;
-using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(Rigidbody))]
+using UnityEngine;
+
 public class PlayerMovement : MonoBehaviour
 {
     public float speed = 5f;
 
     private Rigidbody rb;
-    private Vector2 movement;
+    private Vector3 movement;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        rb.constraints = RigidbodyConstraints.FreezeRotation;
+
+        if (rb == null)
+        {
+            Debug.LogError("Player is missing a Rigidbody!");
+        }
     }
 
     void Update()
     {
-        movement = Vector2.zero;
+        float x = 0f;
+        float z = 0f;
 
-        if (Keyboard.current != null)
-        {
-            if (Keyboard.current.wKey.isPressed || Keyboard.current.zKey.isPressed)
-                movement.y += 1;
+        // Horizontal movement
+        if (Input.GetKey(KeyCode.Q) ||
+            Input.GetKey(KeyCode.A) ||
+            Input.GetKey(KeyCode.LeftArrow))
+            x = -1f;
 
-            if (Keyboard.current.sKey.isPressed)
-                movement.y -= 1;
+        if (Input.GetKey(KeyCode.D) ||
+            Input.GetKey(KeyCode.RightArrow))
+            x = 1f;
 
-            if (Keyboard.current.aKey.isPressed || Keyboard.current.qKey.isPressed)
-                movement.x -= 1;
+        // Vertical movement
+        if (Input.GetKey(KeyCode.Z) ||
+            Input.GetKey(KeyCode.W) ||
+            Input.GetKey(KeyCode.UpArrow))
+            z = 1f;
 
-            if (Keyboard.current.dKey.isPressed)
-                movement.x += 1;
+        if (Input.GetKey(KeyCode.S) ||
+            Input.GetKey(KeyCode.DownArrow))
+            z = -1f;
 
-            if (Keyboard.current.upArrowKey.isPressed)
-                movement.y += 1;
-
-            if (Keyboard.current.downArrowKey.isPressed)
-                movement.y -= 1;
-
-            if (Keyboard.current.leftArrowKey.isPressed)
-                movement.x -= 1;
-
-            if (Keyboard.current.rightArrowKey.isPressed)
-                movement.x += 1;
-        }
-
-        movement = movement.normalized;
+        movement = new Vector3(x, 0f, z).normalized;
     }
 
     void FixedUpdate()
     {
-        Vector3 direction = new Vector3(movement.x, 0f, movement.y);
+        if (rb == null) return;
 
-        rb.linearVelocity = direction * speed;
+        Vector3 velocity = rb.linearVelocity;
+
+        velocity.x = movement.x * speed;
+        velocity.z = movement.z * speed;
+
+        rb.linearVelocity = velocity;
     }
 }
