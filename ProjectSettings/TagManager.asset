@@ -3,18 +3,19 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags: []
+  tags:
+  - Manager
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Guest
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
+  - Throwable
+  - Owner
+  - Obstacles
+  - Ghost
   - 
   - 
   - 
