@@ -4,20 +4,20 @@ using UnityEngine;
 public class CameraFollow : MonoBehaviour
 {
     public Transform target;
-
-    public Vector3 offset = new Vector3(0f, 10f, -10f);
-
     public float smoothSpeed = 5f;
+
+    public Vector3 offset = new Vector3(0f, 12f, -12f);
 
     void LateUpdate()
     {
-        if (target == null) return;
+        if (target == null)
+            return;
 
-        Vector3 targetPosition = target.position + offset;
+        Vector3 desiredPosition = target.position + offset;
 
         transform.position = Vector3.Lerp(
             transform.position,
-            targetPosition,
+            desiredPosition,
             smoothSpeed * Time.deltaTime
         );
 
