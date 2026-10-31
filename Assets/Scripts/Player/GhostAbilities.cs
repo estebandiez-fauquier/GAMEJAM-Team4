@@ -6,16 +6,21 @@ public class GhostAbilities : MonoBehaviour
     [Header("Energy")]
     public float maxEnergy = 100f;
     public float currentEnergy = 100f;
-    public float regeneration = 5f;
+    public float regeneration = 2f;
 
-    [Header("Ability Costs")]
+    [Header("Poltergeist")]
     public float poltergeistCost = 20f;
-    public float flickerCost = 15f;
-    public float apparitionCost = 30f;
+    public float objectRange = 5f;
+    public float throwForce = 8f;
+    public LayerMask objectLayer;
 
-    [Header("Detection")]
-    public float abilityRange = 5f;
-    public LayerMask guestLayer;
+    [Header("Flicker")]
+    public float flickerCost = 15f;
+    public float lightRange = 6f;
+
+    [Header("Apparition")]
+    public float apparitionCost = 30f;
+    public float apparitionRange = 8f;
 
     void Update()
     {
@@ -29,9 +34,12 @@ public class GhostAbilities : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.LeftShift))
             Flicker();
+
+        if (Input.GetKeyDown(KeyCode.E))
+            Apparition();
     }
 
-    public bool UseEnergy(float amount)
+    bool UseEnergy(float amount)
     {
         if (currentEnergy < amount)
         {
@@ -43,59 +51,83 @@ public class GhostAbilities : MonoBehaviour
         return true;
     }
 
+    // ABILITY 1: Throw nearby objects
     void Poltergeist()
     {
         if (!UseEnergy(poltergeistCost))
             return;
 
-        Collider[] targets = Physics.OverlapSphere(
+        Collider[] objects = Physics.OverlapSphere(
             transform.position,
-            abilityRange,
-            guestLayer
+            objectRange,
+            objectLayer
         );
 
-        foreach (Collider target in targets)
+        foreach (Collider obj in objects)
         {
-            GuestAI guest = target.GetComponent<GuestAI>();
+            Rigidbody objectRb = obj.GetComponent<Rigidbody>();
 
-            if (guest != null)
-                guest.Frighten();
+            if (objectRb != null)
+            {
+                Vector3 direction =
+                    (obj.transform.position - transform.position).normalized;
+
+                direction.y = 0.5f;
+
+                objectRb.AddForce(
+                    direction * throwForce,
+                    ForceMode.Impulse
+                );
+            }
         }
+
+        FrightenGuests(objectRange);
 
         Debug.Log("Poltergeist activated!");
     }
 
+    // ABILITY 2: Toggle nearby lights
     void Flicker()
     {
         if (!UseEnergy(flickerCost))
             return;
 
-        Collider[] targets = Physics.OverlapSphere(
-            transform.position,
-            abilityRange,
-            guestLayer
-        );
+        Light[] lights = FindObjectsOfType<Light>();
 
-        foreach (Collider target in targets)
+        foreach (Light light in lights)
         {
-            GuestAI guest = target.GetComponent<GuestAI>();
+            float distance = Vector3.Distance(
+                transform.position,
+                light.transform.position
+            );
 
-            if (guest != null)
-                guest.Frighten();
+            if (distance <= lightRange)
+            {
+                light.enabled = !light.enabled;
+            }
         }
+
+        FrightenGuests(lightRange);
 
         Debug.Log("Flicker activated!");
     }
 
-    public void Apparition()
+    // ABILITY 3: Frighten all nearby guests instantly
+    void Apparition()
     {
         if (!UseEnergy(apparitionCost))
             return;
 
+        FrightenGuests(apparitionRange);
+
+        Debug.Log("Apparition activated!");
+    }
+
+    void FrightenGuests(float range)
+    {
         Collider[] targets = Physics.OverlapSphere(
             transform.position,
-            abilityRange,
-            guestLayer
+            range
         );
 
         foreach (Collider target in targets)
@@ -105,7 +137,5 @@ public class GhostAbilities : MonoBehaviour
             if (guest != null)
                 guest.Frighten();
         }
-
-        Debug.Log("Apparition activated!");
     }
 }

@@ -18,12 +18,13 @@ public class OwnerAI : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (rb == null || waypoints.Length == 0)
+        if (rb == null || waypoints == null ||
+            waypoints.Length == 0)
             return;
 
         Transform target = waypoints[currentWaypoint];
 
-        Vector3 direction = target.position - transform.position;
+        Vector3 direction = target.position - rb.position;
         direction.y = 0f;
 
         if (direction.magnitude <= reachDistance)
@@ -34,10 +35,11 @@ public class OwnerAI : MonoBehaviour
 
         direction.Normalize();
 
-        rb.linearVelocity = new Vector3(
-            direction.x * speed,
-            rb.linearVelocity.y,
-            direction.z * speed
-        );
+        Vector3 velocity = rb.linearVelocity;
+        velocity.x = direction.x * speed;
+        velocity.z = direction.z * speed;
+        rb.linearVelocity = velocity;
+
+        transform.forward = direction;
     }
 }

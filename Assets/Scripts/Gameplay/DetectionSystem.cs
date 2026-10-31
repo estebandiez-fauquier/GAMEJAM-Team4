@@ -7,15 +7,10 @@ public class DetectionSystem : MonoBehaviour
     public float visionRange = 8f;
     [Range(0f, 360f)]
     public float visionAngle = 90f;
+
     public LayerMask ghostLayer;
-    public LayerMask obstacleLayer;
 
-    private OwnerAI ownerAI;
-
-    void Start()
-    {
-        ownerAI = GetComponent<OwnerAI>();
-    }
+    private float nextCatchTime;
 
     void Update()
     {
@@ -32,39 +27,66 @@ public class DetectionSystem : MonoBehaviour
 
         foreach (Collider target in targets)
         {
-            Vector3 direction = target.transform.position - transform.position;
-            direction.y = 0f;
+            Vector3 origin = transform.position + Vector3.up;
+            Vector3 destination = target.bounds.center;
+            Vector3 direction = destination - origin;
 
-            if (direction.sqrMagnitude == 0f)
+            float distance = direction.magnitude;
+
+            if (distance <= 0f || distance > visionRange)
                 continue;
 
-            float angle = Vector3.Angle(transform.forward, direction);
+            float angle = Vector3.Angle(
+                transform.forward,
+                direction
+            );
 
             if (angle > visionAngle / 2f)
                 continue;
 
-            if (Physics.Raycast(
-                transform.position + Vector3.up,
+            RaycastHit[] hits = Physics.RaycastAll(
+                origin,
                 direction.normalized,
-                out RaycastHit hit,
-                visionRange,
-                obstacleLayer))
+                distance,
+                Physics.DefaultRaycastLayers,
+                QueryTriggerInteraction.Ignore
+            );
+
+            float nearestDistance = float.MaxValue;
+            Transform firstObject = null;
+
+            foreach (RaycastHit hit in hits)
             {
-                if (hit.collider.transform.root == target.transform.root)
+                if (hit.transform.root == transform.root)
+                    continue;
+
+                if (hit.distance < nearestDistance)
                 {
-                    CatchGhost(target);
+                    nearestDistance = hit.distance;
+                    firstObject = hit.transform.root;
                 }
+            }
+
+            if (firstObject == target.transform.root)
+            {
+                CatchGhost(target);
+                return;
             }
         }
     }
 
     void CatchGhost(Collider target)
     {
+        if (Time.time < nextCatchTime)
+            return;
+
         GhostLives lives = target.GetComponent<GhostLives>();
         GhostRespawn respawn = target.GetComponent<GhostRespawn>();
 
         if (lives == null || respawn == null)
             return;
+
+        nextCatchTime = Time.time + 2.5f;
 
         lives.LoseLife();
 

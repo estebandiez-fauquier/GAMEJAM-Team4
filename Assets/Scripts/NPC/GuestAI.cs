@@ -13,8 +13,8 @@ public class GuestAI : MonoBehaviour
 
     private Rigidbody rb;
     private Vector3 targetPosition;
-    private bool frightened;
-    private bool leaving;
+    public bool frightened;
+    public bool leaving;
 
     public bool IsLeaving => leaving;
 
