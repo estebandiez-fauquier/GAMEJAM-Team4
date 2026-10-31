@@ -20,7 +20,7 @@ public class Billboard : MonoBehaviour
 
         Vector3 direction = transform.position - mainCamera.transform.position;
 
-        direction.y = 0f;
+        //direction.y = 0f;
 
         if (direction.sqrMagnitude > 0.001f)
         {
