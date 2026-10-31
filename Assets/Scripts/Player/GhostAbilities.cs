@@ -66,23 +66,17 @@ public class GhostAbilities : MonoBehaviour
         foreach (Collider obj in objects)
         {
             Rigidbody objectRb = obj.GetComponent<Rigidbody>();
-
+            obj.GetComponent<ThrowableFear>().thrown = true;
             if (objectRb != null)
             {
                 Vector3 direction =
                     (obj.transform.position - transform.position).normalized;
-
+                
                 direction.y = 0.5f;
 
-                objectRb.AddForce(
-                    direction * throwForce,
-                    ForceMode.Impulse
-                );
+                objectRb.AddForce(direction * throwForce, ForceMode.Impulse);
             }
         }
-
-        FrightenGuests(objectRange);
-
         Debug.Log("Poltergeist activated!");
     }
 

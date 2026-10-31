@@ -1,73 +1,89 @@
 
 using UnityEngine;
+using UnityEngine.AI;
 
 public class GuestAI : MonoBehaviour
 {
     [Header("Movement")]
+    public float wanderRadius = 5f;
     public float wanderSpeed = 2f;
     public float fleeSpeed = 4f;
-    public float wanderRadius = 5f;
 
-    [Header("References")]
+    [Header("Exit")]
     public Transform exitPoint;
+    public float exitDistance = 1.5f;
 
-    private Rigidbody rb;
-    private Vector3 targetPosition;
-    public bool frightened;
-    public bool leaving;
+    private NavMeshAgent agent;
+    private bool frightened;
+    private bool leaving;
 
     public bool IsLeaving => leaving;
 
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
+        agent = GetComponent<NavMeshAgent>();
+
+        if (agent == null)
+        {
+            Debug.LogError("Guest needs a NavMeshAgent!");
+            enabled = false;
+            return;
+        }
+
+        agent.speed = wanderSpeed;
         ChooseNewDestination();
     }
 
     void Update()
     {
-        if (frightened && exitPoint != null)
+        if (frightened)
         {
-            targetPosition = exitPoint.position;
+            if (exitPoint == null)
+                return;
+
+            if (!leaving)
+            {
+                leaving = true;
+                agent.speed = fleeSpeed;
+                agent.SetDestination(exitPoint.position);
+            }
+
+            CheckExit();
+            return;
         }
-        else if (!frightened &&
-                 Vector3.Distance(transform.position, targetPosition) < 1f)
+
+        if (!agent.pathPending &&
+            agent.remainingDistance <= agent.stoppingDistance + 0.2f)
         {
             ChooseNewDestination();
         }
     }
 
-    void FixedUpdate()
-    {
-        if (rb == null)
-            return;
-
-        Vector3 direction = targetPosition - transform.position;
-        direction.y = 0f;
-
-        if (direction.magnitude < 0.1f)
-        {
-            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
-            return;
-        }
-
-        direction.Normalize();
-
-        float speed = frightened ? fleeSpeed : wanderSpeed;
-
-        rb.linearVelocity = new Vector3(
-            direction.x * speed,
-            rb.linearVelocity.y,
-            direction.z * speed
-        );
-    }
-
     void ChooseNewDestination()
     {
-        Vector3 randomPosition = Random.insideUnitSphere * wanderRadius;
-        randomPosition.y = 0f;
+        Vector3 randomPosition =
+            transform.position +
+            Random.insideUnitSphere * wanderRadius;
 
-        targetPosition = transform.position + randomPosition;
+        randomPosition.y = transform.position.y;
+
+        if (NavMesh.SamplePosition(
+            randomPosition,
+            out NavMeshHit hit,
+            wanderRadius,
+            NavMesh.AllAreas))
+        {
+            agent.SetDestination(hit.position);
+        }
+    }
+
+    void CheckExit()
+    {
+        if (Vector3.Distance(transform.position, exitPoint.position)
+            <= exitDistance)
+        {
+            ReachExit();
+        }
     }
 
     public void Frighten()
@@ -81,19 +97,21 @@ public class GuestAI : MonoBehaviour
 
     public void ReachExit()
     {
-        if (!frightened || leaving)
+        if (!leaving)
             return;
 
-        leaving = true;
+        Debug.Log(name + " has left the mansion!");
 
-        if (rb != null)
-            rb.linearVelocity = Vector3.zero;
+        if (agent != null)
+            agent.isStopped = true;
 
-        GuestManager manager = FindFirstObjectByType<GuestManager>();
-
-        if (manager != null)
-            manager.GuestLeft(this);
+        GameObject.FindGameObjectWithTag("Manager").GetComponent<GuestManager>().GuestLeft(this);
 
         gameObject.SetActive(false);
     }
+
+    
 }
+
+
+//GameObject.FindGameObjectWithTag("Manager").GetComponent<GuestManager>().GuestLeft(this);
