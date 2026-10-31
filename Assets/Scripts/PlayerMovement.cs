@@ -11,11 +11,6 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-
-        if (rb == null)
-        {
-            Debug.LogError("Player is missing a Rigidbody!");
-        }
     }
 
     void Update()
