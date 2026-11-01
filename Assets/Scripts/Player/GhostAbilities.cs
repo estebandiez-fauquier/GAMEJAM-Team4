@@ -1,4 +1,5 @@
 
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class GhostAbilities : MonoBehaviour
@@ -16,7 +17,7 @@ public class GhostAbilities : MonoBehaviour
     public LayerMask objectLayer;
 
     public float stunDuration = 3f;
-    public float attractionSpeed = 12f;
+    public float attractionSpeed = 40f;
     public float stunDistance = 1.5f;
 
     private OwnerAI owner;
@@ -151,6 +152,7 @@ public class GhostAbilities : MonoBehaviour
         StartCoroutine(
             SendObjectToOwner(nearestObject)
         );
+        
     }
 
     System.Collections.IEnumerator SendObjectToOwner(Rigidbody objectRb)
@@ -198,6 +200,7 @@ public class GhostAbilities : MonoBehaviour
         }
 
         poltergeistInProgress = false;
+        Destroy(objectRb.gameObject);
     }
 
 
