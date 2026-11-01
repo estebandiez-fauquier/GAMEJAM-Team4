@@ -10,10 +10,34 @@ public class PlayerMovement : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private Vector3 movement;
 
+
+    [Header("Step")]
+    public float stepHeight = 0.3f;
+    public float stepCheckDistance = 0.4f;
+    public float feetOffset = 0.5f; // distance entre le centre du Player et ses pieds
+
+
+
+    void TryStepUp()
+    {
+        Vector3 feet = transform.position - Vector3.up * feetOffset;
+        Vector3 low = feet + Vector3.up * 0.05f;
+        Vector3 high = feet + Vector3.up * stepHeight;
+
+        if (Physics.Raycast(low, movement, stepCheckDistance) &&
+            !Physics.Raycast(high, movement, stepCheckDistance + 0.1f))
+        {
+            rb.position += Vector3.up * stepHeight;
+        }
+    }
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        rb.freezeRotation = true;
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
+        rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
     }
 
     void Update()
@@ -75,5 +99,9 @@ public class PlayerMovement : MonoBehaviour
         velocity.z = movement.z * speed;
 
         rb.linearVelocity = velocity;
+
+        if (rb == null) return;
+
+        if (movement.sqrMagnitude > 0.01f) TryStepUp();
     }
 }
