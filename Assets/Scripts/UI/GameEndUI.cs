@@ -1,6 +1,7 @@
 
 using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class GameEndUI : MonoBehaviour
 {
@@ -26,6 +27,7 @@ public class GameEndUI : MonoBehaviour
                 "THE MANSION IS SILENT",
                 "All guests have escaped. You win!"
             );
+            Invoke("backToMenu", 5f);
         }
         else if (GameManager.Instance.gameOver)
         {
@@ -33,6 +35,7 @@ public class GameEndUI : MonoBehaviour
                 "THE GHOST HAS BEEN CAUGHT",
                 "You have lost all your lives."
             );
+            Invoke("backToMenu", 5f);
         }
     }
 
@@ -43,5 +46,10 @@ public class GameEndUI : MonoBehaviour
         gameEndPanel.SetActive(true);
         gameEndTitle.text = title;
         gameEndText.text = message;
+    }
+
+    void backToMenu()
+    {
+        SceneManager.LoadScene(0);
     }
 }
