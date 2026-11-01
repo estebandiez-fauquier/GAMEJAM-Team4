@@ -1,78 +1,74 @@
 
 using UnityEngine;
+using UnityEngine.AI;
 
 public class OwnerAI : MonoBehaviour
 {
-    [Header("Patrol")]
+    [Header("Patrouille")]
     public Transform[] waypoints;
-    public float speed = 2.5f;
     public float reachDistance = 0.5f;
 
-    private Rigidbody rb;
-    private int currentWaypoint;
-    [Header("Stun")]
+    [Header("Étourdissement")]
     public float stunDuration = 3f;
 
+    private NavMeshAgent agent;
+    private int currentWaypoint = 0;
     private float stunTimer = 0f;
 
     public bool IsStunned => stunTimer > 0f;
 
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
+        agent = GetComponent<NavMeshAgent>();
+
+        if (agent == null)
+        {
+            Debug.LogError("Owner : NavMeshAgent manquant !");
+            return;
+        }
+
+        if (waypoints == null || waypoints.Length == 0)
+        {
+            Debug.LogWarning("Owner : aucun waypoint assigné !");
+            return;
+        }
+
+        agent.SetDestination(waypoints[currentWaypoint].position);
     }
 
-    void FixedUpdate()
+    void Update()
     {
-        if (rb == null || waypoints == null || waypoints.Length == 0)
+        if (agent == null || waypoints == null || waypoints.Length == 0)
             return;
 
+        // Gestion de l'étourdissement
         if (stunTimer > 0f)
         {
-            stunTimer -= Time.fixedDeltaTime;
-
-            Vector3 stunVelocity = rb.linearVelocity;
-            stunVelocity.x = 0f;
-            stunVelocity.z = 0f;
-            rb.linearVelocity = stunVelocity;
-
+            stunTimer -= Time.deltaTime;
+            agent.isStopped = true;
             return;
         }
 
-        Transform target = waypoints[currentWaypoint];
+        agent.isStopped = false;
 
-        Vector3 direction = target.position - rb.position;
-        direction.y = 0f;
-
-        if (direction.magnitude <= reachDistance)
+        // Vérifie si le waypoint est atteint
+        if (!agent.pathPending &&
+            agent.remainingDistance <= reachDistance)
         {
-            currentWaypoint = (currentWaypoint + 1) % waypoints.Length;
-            return;
+            currentWaypoint++;
+
+            if (currentWaypoint >= waypoints.Length)
+                currentWaypoint = 0;
+
+            agent.SetDestination(waypoints[currentWaypoint].position);
         }
-
-        direction.Normalize();
-
-        Vector3 velocity = rb.linearVelocity;
-        velocity.x = direction.x * speed;
-        velocity.z = direction.z * speed;
-
-        rb.linearVelocity = velocity;
-
-        transform.forward = direction;
     }
 
     public void Stun(float duration)
     {
         stunTimer = Mathf.Max(stunTimer, duration);
+        agent.isStopped = true;
 
-        if (rb != null)
-        {
-            Vector3 velocity = rb.linearVelocity;
-            velocity.x = 0f;
-            velocity.z = 0f;
-            rb.linearVelocity = velocity;
-        }
-
-        Debug.Log("Owner stunned for " + duration + " seconds!");
+        Debug.Log("Owner stunned !");
     }
 }
