@@ -15,6 +15,7 @@ public class GuestAI : MonoBehaviour
 
     private NavMeshAgent agent;
     private bool frightened;
+    private int fearLvl = 3;
     private bool leaving;
 
     public bool IsLeaving => leaving;
@@ -90,9 +91,17 @@ public class GuestAI : MonoBehaviour
     {
         if (leaving)
             return;
+        if (fearLvl > 0)
+        {
+            fearLvl--;
+        }
+        else
+        {
+            frightened = true;
+            Debug.Log(name + " is frightened!");
+        }
 
-        frightened = true;
-        Debug.Log(name + " is frightened!");
+
     }
 
     public void ReachExit()

@@ -10,6 +10,12 @@ public class OwnerAI : MonoBehaviour
 
     private Rigidbody rb;
     private int currentWaypoint;
+    [Header("Stun")]
+    public float stunDuration = 3f;
+
+    private float stunTimer = 0f;
+
+    public bool IsStunned => stunTimer > 0f;
 
     void Start()
     {
@@ -18,9 +24,20 @@ public class OwnerAI : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (rb == null || waypoints == null ||
-            waypoints.Length == 0)
+        if (rb == null || waypoints == null || waypoints.Length == 0)
             return;
+
+        if (stunTimer > 0f)
+        {
+            stunTimer -= Time.fixedDeltaTime;
+
+            Vector3 stunVelocity = rb.linearVelocity;
+            stunVelocity.x = 0f;
+            stunVelocity.z = 0f;
+            rb.linearVelocity = stunVelocity;
+
+            return;
+        }
 
         Transform target = waypoints[currentWaypoint];
 
@@ -38,8 +55,24 @@ public class OwnerAI : MonoBehaviour
         Vector3 velocity = rb.linearVelocity;
         velocity.x = direction.x * speed;
         velocity.z = direction.z * speed;
+
         rb.linearVelocity = velocity;
 
         transform.forward = direction;
+    }
+
+    public void Stun(float duration)
+    {
+        stunTimer = Mathf.Max(stunTimer, duration);
+
+        if (rb != null)
+        {
+            Vector3 velocity = rb.linearVelocity;
+            velocity.x = 0f;
+            velocity.z = 0f;
+            rb.linearVelocity = velocity;
+        }
+
+        Debug.Log("Owner stunned for " + duration + " seconds!");
     }
 }

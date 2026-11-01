@@ -18,7 +18,6 @@ public class GhostLives : MonoBehaviour
     {
         currentLives--;
 
-        Debug.Log("Lives remaining: " + currentLives);
 
         if (currentLives <= 0)
         {
