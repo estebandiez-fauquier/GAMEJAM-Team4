@@ -6,7 +6,7 @@ public class GhostAbilities : MonoBehaviour
     [Header("Energy")]
     public float maxEnergy = 100f;
     public float currentEnergy = 100f;
-    public float regeneration = 0.5f;
+    public float regeneration = 1f;
 
     [Header("Poltergeist")]
     public float poltergeistCost = 20f;
